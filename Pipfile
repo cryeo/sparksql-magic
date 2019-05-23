@@ -1,0 +1,13 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "==4.5.0"
+
+[packages]
+sparksql-magic = {editable = true,path = "."}
+
+[requires]
+python_version = "3.6"

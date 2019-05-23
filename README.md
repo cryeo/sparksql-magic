@@ -32,13 +32,14 @@ pip install sparksql-magic
 
 ### Parameter
 ```
-%%sparksql [-c] [-v VIEW] [variable]
+%%sparksql [-c|--cache] [-e|--eager] [-v|--view VIEW] [variable]
 <QUERY>
 ```
 
 |Parameter|Description|
 |---|---|
 |`-c` `--cache`|Cache dataframe|
+|`-e` `--eager`|Cache dataframe with eager load|
 |`-v VIEW` `--view VIEW`|Create or replace temporary view|
 |`variable`|Capture dataframe in a local variable|
 

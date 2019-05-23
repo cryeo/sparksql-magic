@@ -19,6 +19,7 @@ class SparkSql(Magics):
     @magic_arguments()
     @argument('variable', nargs='?', type=str, help='Capture dataframe in a local variable')
     @argument('-c', '--cache', action='store_true', help='Cache dataframe')
+    @argument('-e', '--eager', action='store_true', help='Cache dataframe with eager load')
     @argument('-v', '--view', type=str, help='Create or replace temporary view')
     def sparksql(self, line='', cell='', local_ns=None):
         if local_ns is None:
@@ -36,14 +37,16 @@ class SparkSql(Magics):
             return
 
         df = spark.sql(bind_variables(cell, user_ns))
-        if args.cache:
-            print('cache dataframe')
+        if args.cache or args.eager:
+            print('cache dataframe with %s load' % ('eager' if args.eager else 'lazy'))
             df = df.cache()
+            if args.eager:
+                df.count()
         if args.view:
             print('create temporary view `%s`' % args.view)
             df.createOrReplaceTempView(args.view)
         if args.variable:
-            print('return dataframe to local variable `%s`' % args.variable)
+            print('capture dataframe to local variable `%s`' % args.variable)
             self.shell.user_ns.update({args.variable: df})
 
         header, contents = get_results(df, self.max_num_rows)

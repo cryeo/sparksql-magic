@@ -7,6 +7,7 @@ setup(
     version=sparksql_magic.__version__,
     description='Spark SQL magic command for Jupyter notebooks',
     long_description=open('README.md', 'r').read(),
+    long_description_content_type='text/markdown',
     author='Chaerim Yeo',
     author_email='yeochaerim@gmail.com',
     url='https://github.com/cryeo/sparksql-magic',

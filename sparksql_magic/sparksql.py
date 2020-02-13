@@ -12,7 +12,7 @@ BIND_VARIABLE_PATTERN = re.compile(r'{([A-Za-z0-9_]+)}')
 
 @magics_class
 class SparkSql(Magics):
-    max_num_rows = Int(20, config=True, help='The maximum number of rows to display')
+    limit = Int(20, config=True, help='The maximum number of rows to display')
 
     @needs_local_scope
     @cell_magic
@@ -21,6 +21,7 @@ class SparkSql(Magics):
     @argument('-c', '--cache', action='store_true', help='Cache dataframe')
     @argument('-e', '--eager', action='store_true', help='Cache dataframe with eager load')
     @argument('-v', '--view', type=str, help='Create or replace temporary view')
+    @argument('-l', '--limit', type=int, help='The maximum number of rows to display')
     def sparksql(self, line='', cell='', local_ns=None):
         if local_ns is None:
             local_ns = {}
@@ -49,14 +50,15 @@ class SparkSql(Magics):
             print('capture dataframe to local variable `%s`' % args.variable)
             self.shell.user_ns.update({args.variable: df})
 
-        header, contents = get_results(df, self.max_num_rows)
-        if len(contents) > self.max_num_rows:
-            print('only showing top %d row(s)' % self.max_num_rows)
+        limit = args.limit or self.limit
+        header, contents = get_results(df, limit)
+        if len(contents) > limit:
+            print('only showing top %d row(s)' % limit)
 
         html = make_tag('tr',
                         ''.join(map(lambda x: make_tag('td', escape(x), style='font-weight: bold'), header)),
                         style='border-bottom: 1px solid')
-        for index, row in enumerate(contents[:self.max_num_rows]):
+        for index, row in enumerate(contents[:limit]):
             html += make_tag('tr', ''.join(map(lambda x: make_tag('td', escape(x)), row)))
 
         return HTML(make_tag('table', html))
@@ -72,14 +74,14 @@ def bind_variables(query, user_ns):
     return re.sub(BIND_VARIABLE_PATTERN, fetch_variable, query)
 
 
-def get_results(df, max_num_rows):
+def get_results(df, limit):
     def convert_value(value):
         if value is None:
             return 'null'
         return str(value)
 
     header = df.columns
-    contents = list(map(lambda row: list(map(convert_value, row)), df.take(max_num_rows + 1)))
+    contents = list(map(lambda row: list(map(convert_value, row)), df.take(limit + 1)))
 
     return header, contents
 
